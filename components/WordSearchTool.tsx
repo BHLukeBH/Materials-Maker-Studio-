@@ -36,8 +36,6 @@ const WordSearchTool: React.FC = () => {
     const isCellInAnswer = (r: number, c: number) => {
         return placedWords.some(pw => {
             // Check if this cell is part of the word path
-            // Very simple check: iterate path
-            // Ideally we store the path in generated result
             return pw.path.some((p: {r: number, c: number}) => p.r === r && p.c === c);
         });
     };
@@ -96,3 +94,99 @@ HERE"
                         </div>
                         
                         {isGenerated ? (
+                            <div className="flex flex-col items-center">
+                                <div className="grid grid-cols-15 gap-0 border-2 border-slate-800 bg-white">
+                                    {grid.map((row, r) => (
+                                        <div key={r} className="flex">
+                                            {row.map((cell, c) => (
+                                                <div 
+                                                    key={`${r}-${c}`} 
+                                                    className={`w-8 h-8 flex items-center justify-center font-mono font-bold border border-slate-200 text-sm
+                                                        ${showAnswers && isCellInAnswer(r, c) ? 'bg-yellow-200 text-slate-900' : 'text-slate-700'}
+                                                    `}
+                                                >
+                                                    {cell}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="mt-4 flex flex-wrap gap-2 justify-center max-w-md">
+                                    {config.words.map(w => (
+                                        <span key={w} className="px-2 py-1 bg-slate-200 rounded text-xs font-bold text-slate-700">{w}</span>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="text-slate-400 italic">Enter words and click generate...</div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Print View */}
+            {isGenerated && (
+                <div className="print-only w-full bg-white text-slate-900">
+                    {/* Page 1: Puzzle */}
+                    <div className="flex flex-col items-center justify-center h-screen page-break relative p-8">
+                        <h1 className="text-4xl font-serif font-bold mb-8 text-bh-navy">{config.title}</h1>
+                        
+                        <div className="border-4 border-slate-800 p-1 mb-8">
+                            {grid.map((row, r) => (
+                                <div key={r} className="flex">
+                                    {row.map((cell, c) => (
+                                        <div key={`${r}-${c}`} className="w-10 h-10 flex items-center justify-center font-mono text-lg font-bold border border-slate-300">
+                                            {cell}
+                                        </div>
+                                    ))}
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="w-full max-w-2xl">
+                            <h3 className="font-bold border-b-2 border-slate-800 mb-4 pb-1">Find these words:</h3>
+                            <div className="columns-3 gap-8">
+                                {config.words.map(w => (
+                                    <div key={w} className="mb-2 font-mono">{w}</div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="absolute bottom-4 right-4 opacity-50">
+                            <img src="logo.png" onError={(e) => e.currentTarget.style.display = 'none'} alt="BH Logo" className="h-8" />
+                        </div>
+                    </div>
+
+                    {/* Page 2: Answer Key */}
+                    <div className="print-exact flex flex-col items-center justify-center h-screen relative p-8 bg-white">
+                        <h1 className="text-4xl font-serif font-bold mb-2 text-bh-navy">{config.title}</h1>
+                        <h2 className="text-xl font-bold text-slate-500 mb-8">- ANSWER KEY -</h2>
+
+                        <div className="border-4 border-slate-800 p-1">
+                            {grid.map((row, r) => (
+                                <div key={r} className="flex">
+                                    {row.map((cell, c) => (
+                                        <div 
+                                            key={`${r}-${c}`} 
+                                            className={`w-10 h-10 flex items-center justify-center font-mono text-lg font-bold border border-slate-300
+                                                ${isCellInAnswer(r,c) ? 'bg-yellow-200 text-black' : 'text-slate-400'}
+                                            `}
+                                        >
+                                            {cell}
+                                        </div>
+                                    ))}
+                                </div>
+                            ))}
+                        </div>
+                        
+                         <div className="absolute bottom-4 right-4 opacity-50">
+                            <img src="logo.png" onError={(e) => e.currentTarget.style.display = 'none'} alt="BH Logo" className="h-8" />
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default WordSearchTool;
