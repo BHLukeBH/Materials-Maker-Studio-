@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BoardTile, BoardGameTemplate } from '../types';
-import { Printer, Shuffle, Edit2 } from 'lucide-react';
+import { Printer, Edit2 } from 'lucide-react';
 
 const COLORS = [
     { name: 'White', value: '#ffffff' },
@@ -172,7 +172,7 @@ const BoardGameTool: React.FC = () => {
 // Reusable Board Renderer
 const GameBoard = ({ tiles, template, onTileClick, printMode }: { tiles: BoardTile[], template: BoardGameTemplate, onTileClick?: (id: number) => void, printMode?: boolean }) => {
     
-    const tileClass = (t: BoardTile) => `
+    const tileClass = (_: BoardTile) => `
         border-2 border-slate-800 flex items-center justify-center text-center p-2 relative
         ${printMode ? 'shadow-none' : 'shadow-md cursor-pointer hover:scale-105 transition-transform'}
         text-sm font-bold
@@ -213,7 +213,7 @@ const GameBoard = ({ tiles, template, onTileClick, printMode }: { tiles: BoardTi
 
         return (
             <div className="grid grid-cols-6 gap-2 w-[800px]">
-                {displayOrder.map((tileIndex, visualIndex) => {
+                {displayOrder.map((tileIndex, _) => {
                     const t = tiles[tileIndex];
                     if (!t) return null;
                     
