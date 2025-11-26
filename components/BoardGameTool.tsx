@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BoardTile, BoardGameTemplate } from '../types';
-import { Printer, Edit2 } from 'lucide-react';
+import { Printer, Edit2, Type } from 'lucide-react';
 
 const COLORS = [
     { name: 'White', value: '#ffffff' },
@@ -11,10 +11,10 @@ const COLORS = [
     { name: 'Gold', value: '#fde68a' }, // British Hills Gold-ish
 ];
 
-const TEMPLATES: Record<BoardGameTemplate, { tiles: number; name: string }> = {
-    snake: { tiles: 24, name: 'Snake (Winding)' },
-    race: { tiles: 20, name: 'Race Track (Loop)' },
-    bingo: { tiles: 16, name: 'Bingo / Grid (4x4)' },
+const TEMPLATES: Record<BoardGameTemplate, { tiles: number; name: string; defaultTitle: string }> = {
+    snake: { tiles: 24, name: 'Snake (Winding)', defaultTitle: 'Adventure Path' },
+    race: { tiles: 20, name: 'Race Track (Loop)', defaultTitle: 'Race Track' },
+    bingo: { tiles: 16, name: 'Bingo / Grid (4x4)', defaultTitle: 'Bingo' },
 };
 
 const BoardGameTool: React.FC = () => {
@@ -22,10 +22,16 @@ const BoardGameTool: React.FC = () => {
     const [tiles, setTiles] = useState<BoardTile[]>([]);
     const [editTileId, setEditTileId] = useState<number | null>(null);
     const [quickFillText, setQuickFillText] = useState('');
+    const [gameTitle, setGameTitle] = useState('');
 
-    // Initialize tiles on template change
+    // Initialize tiles and title on template change
     useEffect(() => {
-        const count = TEMPLATES[template].tiles;
+        const config = TEMPLATES[template];
+        const count = config.tiles;
+        
+        // Set Default Title
+        setGameTitle(config.defaultTitle);
+
         const newTiles: BoardTile[] = Array.from({ length: count }, (_, i) => ({
             id: i,
             text: '',
@@ -82,29 +88,49 @@ const BoardGameTool: React.FC = () => {
                     </button>
                 </div>
 
-                <div className="flex gap-4 border-b">
-                    {(Object.keys(TEMPLATES) as BoardGameTemplate[]).map((t) => (
-                        <button
-                            key={t}
-                            onClick={() => setTemplate(t)}
-                            className={`px-4 py-2 font-semibold border-b-2 transition-colors ${template === t ? 'border-bh-gold text-bh-navy' : 'border-transparent text-slate-500'}`}
-                        >
-                            {TEMPLATES[t].name}
-                        </button>
-                    ))}
+                <div className="grid md:grid-cols-2 gap-6">
+                    {/* Template Selection */}
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-2">Game Style</label>
+                        <div className="flex gap-2">
+                            {(Object.keys(TEMPLATES) as BoardGameTemplate[]).map((t) => (
+                                <button
+                                    key={t}
+                                    onClick={() => setTemplate(t)}
+                                    className={`px-4 py-2 text-sm font-semibold rounded-lg border transition-colors ${template === t ? 'bg-bh-navy text-white border-bh-navy' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'}`}
+                                >
+                                    {TEMPLATES[t].name}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                     {/* Title Editor */}
+                     <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                            <Type size={16} /> Game Title (Print Header)
+                        </label>
+                        <input 
+                            type="text" 
+                            value={gameTitle}
+                            onChange={(e) => setGameTitle(e.target.value)}
+                            className="w-full border border-slate-300 p-2 rounded-lg"
+                            placeholder="e.g. Past Tense Race"
+                        />
+                    </div>
                 </div>
 
-                <div>
-                     <label className="block text-sm font-semibold text-slate-700 mb-1">Quick Fill Words</label>
+                <div className="pt-4 border-t border-slate-100">
+                     <label className="block text-sm font-semibold text-slate-700 mb-2">Quick Fill Words</label>
                      <div className="flex gap-2">
                         <input 
                             type="text" 
                             className="flex-1 border p-2 rounded-lg" 
-                            placeholder="Words to fill empty tiles..." 
+                            placeholder="Type words separated by commas to fill empty tiles..." 
                             value={quickFillText}
                             onChange={(e) => setQuickFillText(e.target.value)}
                         />
-                        <button onClick={handleQuickFill} className="bg-slate-200 px-4 py-2 rounded-lg font-semibold hover:bg-slate-300">Fill</button>
+                        <button onClick={handleQuickFill} className="bg-slate-200 px-4 py-2 rounded-lg font-semibold hover:bg-slate-300 transition-colors">Fill</button>
                      </div>
                 </div>
             </div>
@@ -157,8 +183,8 @@ const BoardGameTool: React.FC = () => {
 
             {/* Print View */}
             <div className="print-only w-full h-full p-4 flex flex-col items-center justify-center">
-                <h1 className="text-4xl font-bold text-center mb-8 font-serif text-bh-navy">
-                    {template === 'snake' ? 'Adventure Path' : template === 'race' ? 'Race Track' : 'Bingo'}
+                <h1 className="text-5xl font-bold text-center mb-8 font-serif text-bh-navy uppercase tracking-wider">
+                    {gameTitle}
                 </h1>
                 <GameBoard tiles={tiles} template={template} printMode />
                 <div className="absolute bottom-4 right-4 opacity-50">
@@ -172,7 +198,7 @@ const BoardGameTool: React.FC = () => {
 // Reusable Board Renderer
 const GameBoard = ({ tiles, template, onTileClick, printMode }: { tiles: BoardTile[], template: BoardGameTemplate, onTileClick?: (id: number) => void, printMode?: boolean }) => {
     
-    const tileClass = (t: BoardTile) => `
+    const tileClass = (_t: BoardTile) => `
         border-2 border-slate-800 flex items-center justify-center text-center p-2 relative
         ${printMode ? 'shadow-none' : 'shadow-md cursor-pointer hover:scale-105 transition-transform'}
         text-sm font-bold
