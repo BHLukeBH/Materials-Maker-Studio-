@@ -15,7 +15,6 @@ const ImageCropperModal: React.FC<ImageCropperModalProps> = ({ imageSrc, onCance
     const [isDragging, setIsDragging] = useState(false);
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
-    const ASPECT_RATIO = 4 / 3;
     const CANVAS_WIDTH = 600;
     const CANVAS_HEIGHT = 450; // 4:3 of 600
 
