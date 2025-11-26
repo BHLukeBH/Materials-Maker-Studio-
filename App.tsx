@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Layers, Grid, Type, Menu } from 'lucide-react';
+import { Layers, Grid, Type, Menu, AlignLeft } from 'lucide-react';
 import { ToolType } from './types';
 import FlashcardTool from './components/FlashcardTool';
 import BoardGameTool from './components/BoardGameTool';
 import WordSearchTool from './components/WordSearchTool';
+import ScrambleTool from './components/ScrambleTool';
 
 const App: React.FC = () => {
   const [activeTool, setActiveTool] = useState<ToolType>('flashcards');
@@ -14,6 +15,7 @@ const App: React.FC = () => {
       case 'flashcards': return <FlashcardTool />;
       case 'boardgame': return <BoardGameTool />;
       case 'wordsearch': return <WordSearchTool />;
+      case 'scramble': return <ScrambleTool />;
       default: return <FlashcardTool />;
     }
   };
@@ -54,6 +56,13 @@ const App: React.FC = () => {
                 onClick={() => setActiveTool('wordsearch')} 
                 icon={<Type size={20} />} 
                 label="Word Search" 
+                isOpen={isSidebarOpen} 
+            />
+            <NavButton 
+                active={activeTool === 'scramble'} 
+                onClick={() => setActiveTool('scramble')} 
+                icon={<AlignLeft size={20} />} 
+                label="Sentence Scramble" 
                 isOpen={isSidebarOpen} 
             />
         </nav>
