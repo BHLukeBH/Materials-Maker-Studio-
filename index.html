@@ -39,20 +39,25 @@
         .no-print { display: none !important; }
         .print-only { display: block !important; }
         .page-break { break-after: page; }
-        /* Reset heights for printing */
-        html, body, #root { height: auto !important; overflow: visible !important; }
+        
+        /* Reset heights and FORCE WHITE BACKGROUND for printing to save ink */
+        html, body, #root, main { 
+            height: auto !important; 
+            overflow: visible !important; 
+            background-color: #ffffff !important; 
+        }
       }
       .print-only { display: none; }
     </style>
 <script type="importmap">
 {
   "imports": {
-    "vite": "https://aistudiocdn.com/vite@^7.2.4",
     "react/": "https://aistudiocdn.com/react@^19.2.0/",
     "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
     "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
-    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
+    "vite": "https://aistudiocdn.com/vite@^7.2.4",
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1"
   }
 }
 </script>
