@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BoardTile, BoardGameTemplate } from '../types';
-import { Printer, Edit2, Type } from 'lucide-react';
+import { Printer, Edit2, Type, Palette } from 'lucide-react';
 
 const COLORS = [
     { name: 'White', value: '#ffffff' },
@@ -9,6 +9,18 @@ const COLORS = [
     { name: 'Blue', value: '#dbeafe' },
     { name: 'Yellow', value: '#fef9c3' },
     { name: 'Gold', value: '#fde68a' }, // British Hills Gold-ish
+];
+
+const BACKGROUND_OPTIONS = [
+    { name: 'None (White)', value: 'white' },
+    { name: 'Mist', value: '#f1f5f9' },
+    { name: 'Cream', value: '#fffbeb' },
+    { name: 'Pale Blue', value: '#ecfeff' },
+    { name: 'Pale Green', value: '#f0fdf4' },
+    { name: 'Sunset (Gradient)', value: 'linear-gradient(to bottom, #fff7ed, #fdba74)' },
+    { name: 'Ocean (Gradient)', value: 'linear-gradient(to bottom, #ecfeff, #67e8f9)' },
+    { name: 'Meadow (Gradient)', value: 'linear-gradient(to bottom, #f0fdf4, #86efac)' },
+    { name: 'Lavender (Gradient)', value: 'linear-gradient(to bottom, #faf5ff, #d8b4fe)' },
 ];
 
 const TEMPLATES: Record<BoardGameTemplate, { tiles: number; name: string; defaultTitle: string }> = {
@@ -23,6 +35,7 @@ const BoardGameTool: React.FC = () => {
     const [editTileId, setEditTileId] = useState<number | null>(null);
     const [quickFillText, setQuickFillText] = useState('');
     const [gameTitle, setGameTitle] = useState('');
+    const [bgStyle, setBgStyle] = useState('white');
 
     // Initialize tiles and title on template change
     useEffect(() => {
@@ -92,7 +105,7 @@ const BoardGameTool: React.FC = () => {
                     {/* Template Selection */}
                     <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-2">Game Style</label>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 mb-4">
                             {(Object.keys(TEMPLATES) as BoardGameTemplate[]).map((t) => (
                                 <button
                                     key={t}
@@ -103,20 +116,52 @@ const BoardGameTool: React.FC = () => {
                                 </button>
                             ))}
                         </div>
+
+                        {/* Title Editor */}
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                                <Type size={16} /> Game Title (Print Header)
+                            </label>
+                            <input 
+                                type="text" 
+                                value={gameTitle}
+                                onChange={(e) => setGameTitle(e.target.value)}
+                                className="w-full border border-slate-300 p-2 rounded-lg"
+                                placeholder="e.g. Past Tense Race"
+                            />
+                        </div>
                     </div>
 
-                     {/* Title Editor */}
+                     {/* Background Selection */}
                      <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
-                            <Type size={16} /> Game Title (Print Header)
+                            <Palette size={16} /> Background Style
                         </label>
-                        <input 
-                            type="text" 
-                            value={gameTitle}
-                            onChange={(e) => setGameTitle(e.target.value)}
-                            className="w-full border border-slate-300 p-2 rounded-lg"
-                            placeholder="e.g. Past Tense Race"
-                        />
+                        <select 
+                            value={BACKGROUND_OPTIONS.some(o => o.value === bgStyle) ? bgStyle : 'custom'} 
+                            onChange={(e) => {
+                                if(e.target.value !== 'custom') setBgStyle(e.target.value);
+                            }}
+                            className="w-full p-2 border border-slate-300 rounded-lg mb-2"
+                        >
+                            {BACKGROUND_OPTIONS.map(opt => (
+                                <option key={opt.name} value={opt.value}>{opt.name}</option>
+                            ))}
+                            <option value="custom">Custom Color...</option>
+                        </select>
+                        
+                        {/* Custom Color Picker if not a gradient */}
+                        {!bgStyle.includes('gradient') && (
+                            <div className="flex items-center gap-2">
+                                <input 
+                                    type="color" 
+                                    value={bgStyle} 
+                                    onChange={(e) => setBgStyle(e.target.value)}
+                                    className="h-8 w-12 p-0 border rounded cursor-pointer"
+                                />
+                                <span className="text-xs text-slate-500">Pick custom solid color</span>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -141,7 +186,7 @@ const BoardGameTool: React.FC = () => {
                 <div className="bg-slate-200 p-8 rounded-xl overflow-x-auto min-h-[500px] flex items-center justify-center">
                     {/* Render the Game Board Wrapper */}
                     <div className="scale-75 origin-top">
-                        <GameBoard tiles={tiles} template={template} onTileClick={setEditTileId} />
+                        <GameBoard tiles={tiles} template={template} bgStyle={bgStyle} onTileClick={setEditTileId} />
                     </div>
                 </div>
             </div>
@@ -186,7 +231,7 @@ const BoardGameTool: React.FC = () => {
                 <h1 className="text-5xl font-bold text-center mb-8 font-serif text-bh-navy uppercase tracking-wider">
                     {gameTitle}
                 </h1>
-                <GameBoard tiles={tiles} template={template} printMode />
+                <GameBoard tiles={tiles} template={template} bgStyle={bgStyle} printMode />
                 <div className="absolute bottom-4 right-4 opacity-50">
                     <img src="logo.png" onError={(e) => e.currentTarget.style.display = 'none'} alt="BH Logo" className="h-12" />
                 </div>
@@ -196,7 +241,15 @@ const BoardGameTool: React.FC = () => {
 };
 
 // Reusable Board Renderer
-const GameBoard = ({ tiles, template, onTileClick, printMode }: { tiles: BoardTile[], template: BoardGameTemplate, onTileClick?: (id: number) => void, printMode?: boolean }) => {
+interface GameBoardProps {
+    tiles: BoardTile[]; 
+    template: BoardGameTemplate; 
+    bgStyle: string;
+    onTileClick?: (id: number) => void; 
+    printMode?: boolean;
+}
+
+const GameBoard: React.FC<GameBoardProps> = ({ tiles, template, bgStyle, onTileClick, printMode }) => {
     
     const tileClass = (_t: BoardTile) => `
         border-2 border-slate-800 flex items-center justify-center text-center p-2 relative
@@ -208,9 +261,17 @@ const GameBoard = ({ tiles, template, onTileClick, printMode }: { tiles: BoardTi
         backgroundColor: t.color,
     });
 
+    // Container style ensures background prints and looks correct
+    const containerStyle = {
+        background: bgStyle,
+    };
+
     if (template === 'bingo') {
         return (
-            <div className="grid grid-cols-4 gap-4 w-[600px] aspect-square">
+            <div 
+                className="grid grid-cols-4 gap-4 w-[600px] aspect-square p-8 rounded-xl print-exact border-4 border-slate-800"
+                style={containerStyle}
+            >
                 {tiles.map(t => (
                     <div 
                         key={t.id} 
@@ -226,7 +287,7 @@ const GameBoard = ({ tiles, template, onTileClick, printMode }: { tiles: BoardTi
     }
 
     if (template === 'snake') {
-        // Snake Layout: 6 cols, 4 rows.
+        // Snake Layout
         const displayOrder: number[] = [];
         // Row 0
         for(let i=0; i<6; i++) displayOrder.push(i);
@@ -238,7 +299,10 @@ const GameBoard = ({ tiles, template, onTileClick, printMode }: { tiles: BoardTi
         for(let i=23; i>=18; i--) displayOrder.push(i);
 
         return (
-            <div className="grid grid-cols-6 gap-2 w-[800px]">
+            <div 
+                className="grid grid-cols-6 gap-2 w-[800px] p-8 rounded-xl print-exact border-4 border-slate-800"
+                style={containerStyle}
+            >
                 {displayOrder.map((tileIndex, _) => {
                     const t = tiles[tileIndex];
                     if (!t) return null;
@@ -261,12 +325,14 @@ const GameBoard = ({ tiles, template, onTileClick, printMode }: { tiles: BoardTi
 
     if (template === 'race') {
         // Race Track Loop: 6x6 Grid.
-        // Uses Grid Area logic to place tiles in a loop around the center.
         return (
-            <div className="relative w-[800px] aspect-square bg-white border-4 border-slate-300 rounded-3xl p-6 grid grid-cols-6 grid-rows-6 gap-2">
+            <div 
+                className="relative w-[800px] aspect-square border-4 border-slate-300 rounded-3xl p-6 grid grid-cols-6 grid-rows-6 gap-2 print-exact"
+                style={containerStyle}
+            >
                  {/* Center Decoration */}
-                 <div className="col-start-2 col-end-6 row-start-2 row-end-6 border-4 border-dashed border-slate-200 rounded-2xl flex items-center justify-center pointer-events-none">
-                    <span className="text-6xl font-black text-slate-200 rotate-[-15deg]">RACE!</span>
+                 <div className="col-start-2 col-end-6 row-start-2 row-end-6 border-4 border-dashed border-slate-400/50 rounded-2xl flex items-center justify-center pointer-events-none">
+                    <span className="text-6xl font-black text-slate-800/20 rotate-[-15deg]">RACE!</span>
                  </div>
 
                  {tiles.map((t, i) => {
