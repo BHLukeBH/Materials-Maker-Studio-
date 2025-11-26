@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Layers, Grid, Type, Menu, Printer } from 'lucide-react';
+import { Layers, Grid, Type, Menu } from 'lucide-react';
 import { ToolType } from './types';
 import FlashcardTool from './components/FlashcardTool';
 import BoardGameTool from './components/BoardGameTool';
