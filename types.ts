@@ -1,4 +1,4 @@
-export type ToolType = 'flashcards' | 'boardgame' | 'wordsearch';
+export type ToolType = 'flashcards' | 'boardgame' | 'wordsearch' | 'scramble';
 
 export interface Flashcard {
   id: number;
@@ -18,4 +18,10 @@ export interface BoardTile {
 export interface WordSearchConfig {
   title: string;
   words: string[];
+}
+
+export interface ScrambleItem {
+  id: number;
+  original: string;
+  scrambled: string[];
 }
