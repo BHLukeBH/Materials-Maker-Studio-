@@ -40,11 +40,22 @@
         .print-only { display: block !important; }
         .page-break { break-after: page; }
         
-        /* Reset heights and FORCE WHITE BACKGROUND for printing to save ink */
-        html, body, #root, main { 
+        /* Reset heights and FORCE WHITE BACKGROUND for PAGE only, not content */
+        html, body { 
             height: auto !important; 
             overflow: visible !important; 
             background-color: #ffffff !important; 
+        }
+        
+        #root, main {
+             height: auto !important; 
+             overflow: visible !important;
+        }
+
+        /* Utility to force background printing on specific elements */
+        .print-exact {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
       }
       .print-only { display: none; }
